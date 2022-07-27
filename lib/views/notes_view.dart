@@ -13,8 +13,7 @@ class NotesView extends StatefulWidget {
 
 class _NotesViewState extends State<NotesView> {
   late final NotesService _notesService;
-  //String get userEmail => AuthService.firebase().currentUser!.email!;
-  String? get userEmail => AuthService.firebase().currentUser?.email;
+  String get userEmail => AuthService.firebase().currentUser!.email!;
 
   @override
   void initState() {
@@ -31,54 +30,54 @@ class _NotesViewState extends State<NotesView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Main UI'),
-        actions: [
-          PopupMenuButton<MenuAction>(
-            onSelected: (value) async {
-              switch (value) {
-                case MenuAction.logout:
-                  final shouldLogout = await showLogoutDialog(context);
-                  if (shouldLogout) {
-                    await AuthService.firebase().logOut();
-                    // ignore: use_build_context_synchronously
-                    Navigator.of(context)
-                        .pushNamedAndRemoveUntil(loginRoute, (_) => false);
-                  }
-              }
-            },
-            itemBuilder: (context) {
-              return const [
-                PopupMenuItem<MenuAction>(
-                  value: MenuAction.logout,
-                  child: Text('Logout'),
-                ),
-              ];
-            },
-          )
-        ],
-      ),
-      body: FutureBuilder(
-        future: _notesService.getOrCreateUser(email: userEmail),
-        builder: (context, snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.done:
-              return StreamBuilder(
+        appBar: AppBar(
+          title: const Text('Main UI'),
+          actions: [
+            PopupMenuButton<MenuAction>(
+              onSelected: (value) async {
+                switch (value) {
+                  case MenuAction.logout:
+                    final shouldLogout = await showLogoutDialog(context);
+                    if (shouldLogout) {
+                      await AuthService.firebase().logOut();
+                      // ignore: use_build_context_synchronously
+                      Navigator.of(context)
+                          .pushNamedAndRemoveUntil(loginRoute, (_) => false);
+                    }
+                }
+              },
+              itemBuilder: (context) {
+                return const [
+                  PopupMenuItem<MenuAction>(
+                    value: MenuAction.logout,
+                    child: Text('Logout'),
+                  ),
+                ];
+              },
+            )
+          ],
+        ),
+        body: FutureBuilder(
+          future: _notesService.getOrCreateUser(email: userEmail),
+          builder: (context, snapshot) {
+            switch (snapshot.connectionState) {
+              case ConnectionState.done:
+                return StreamBuilder(
                   stream: _notesService.allNotes,
                   builder: (context, snapshot) {
                     switch (snapshot.connectionState) {
                       case ConnectionState.waiting:
-                        return const Text('Waiting for all notes...');
+                        return const Text('Waiting for all notes');
                       default:
                         return const CircularProgressIndicator();
                     }
-                  });
-            default:
-              return const CircularProgressIndicator();
-          }
-        },
-      ),
-    );
+                  },
+                );
+              default:
+                return const CircularProgressIndicator();
+            }
+          },
+        ));
   }
 }
 
